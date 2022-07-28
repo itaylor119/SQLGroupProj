@@ -1,0 +1,113 @@
+Ian Taylor, Jared Aho
+CP252 - Lab 01
+
+Work is split by odds/evens. Jared will do odds, I will do evens.
+
+	Query 1:
+SELECT title_id
+FROM titles
+WHERE title = (SELECT title FROM titles WHERE title = 'The Busy Executive''s Database Guide');
+
+Result:
++----------+
+| title_id |
++----------+
+| BU1032   |
++----------+
+
+	Query 2: SELECT SUM(qty) FROM sales WHERE title_id = "PS2091";
+
+Result: Column "SUM(qty)", value 108.
+
+	Query 3:
+*
+I didn't use the FORMAT function to format the function as it gave me warnings. Instead, I opted to use the CAST function.
+If the FORMAT function is required, simply replace "CAST(AVG( SA.qty ) AS int)" With "FORMAT(AVG( SA.qty ), '##')".
+It yields the same table, but it has warnings.
+*
+
+SELECT ST.stor_name AS Store, SUM( SA.qty ) AS Sum, CAST(AVG( SA.qty ) AS int) AS Avg
+FROM stores ST
+JOIN sales SA
+ON ST.stor_id = SA.stor_id
+GROUP BY ST.stor_name;
+
+Result:
++--------------------------------------+------+------+
+| Store                                | Sum  | Avg  |
++--------------------------------------+------+------+
+| Barnum's                             |  125 |   63 |
+| Bookbeat                             |   40 |   20 |
+| Doc-U-Mat: Quality Laundry and Books |   45 |   23 |
+| Eric the Read Books                  |    3 |    3 |
+| Fricative Bookshop                   |   15 |   15 |
+| News & Brews                         |   50 |   25 |
++--------------------------------------+------+------+
+
+	Query 4: SELECT stor_name AS Store, DATE_FORMAT(S.ord_date, "%m/%d/%Y") AS Date, S.qty FROM stores ST
+JOIN sales S ON ST.stor_id = S.stor_id
+WHERE S.title_id = "PS2091";
+
+Result: Exactly as shown in lab instructions.
++--------------------------------------+------------+-----+
+| Store                                | Date       | qty
+|
++--------------------------------------+------------+-----+
+| Eric the Read Books                  | 09/13/1994 |   3 |
+| Barnum's                             | 09/13/1994 |  75 |
+| News & Brews                         | 09/14/1994 |  10 |
+| Doc-U-Mat: Quality Laundry and Books | 09/14/1994 |  20 |
++--------------------------------------+------------+-----+
+
+	Query 5:CREATE FUNCTION F_AS_DATE_2(d CHAR(8)) 
+RETURNS VARCHAR(20) DETERMINISTIC
+RETURN DATE_FORMAT(d, "%m/%d/%Y");
+
+SELECT P.pub_name AS Publisher, CONCAT(E.fname, ' ', E.lname) AS Employee, F_AS_DATE_2(E.hire_date) AS 'Date of Hire', E.job_lvl
+FROM employee E
+JOIN publishers P
+ON E.pub_id = P.pub_id
+WHERE job_id = (SELECT job_id FROM jobs WHERE job_desc = 'Designer');
+
+Result:
++----------------------+-------------------+--------------+---------+
+| Publisher            | Employee          | Date of Hire | job_lvl |
++----------------------+-------------------+--------------+---------+
+| Binnet & Hardley     | Elizabeth Lincoln | 07/24/1990   |      35 |
+| New Moon Books       | Karin Josephs     | 10/17/1992   |     100 |
+| Algodata Infosystems | Pedro Afonso      | 12/24/1990   |      89 |
++----------------------+-------------------+--------------+---------+
+
+	Query 6: SELECT stor_name AS Store, T.title AS Title, (S.qty * T.price) AS Total FROM stores ST
+JOIN sales S ON ST.stor_id = S.stor_id
+JOIN titles T ON T.title_id = S.title_id;
+
+Result: Exactly as shown in lab instructions.
++--------------------------------------+----------------------------------
+-------------------------------+---------+
+| Store                                | Title                                                           
+| Total   |
++--------------------------------------+----------------------------------
+-------------------------------+---------+
+| Eric the Read Books                  | Is Anger the Enemy?                                             
+|   32.85 |
+| Barnum's                             | Secrets of Silicon Valley                                       
+| 1000.00 |
+| Barnum's                             | Is Anger the Enemy?                                             
+|  821.25 |
+| News & Brews                         | Is Anger the Enemy?                                             
+|  109.50 |
+| News & Brews                         | Onions, Leeks, and Garlic: 
+Cooking Secrets of the Mediterranean |  838.00 |
+| Doc-U-Mat: Quality Laundry and Books | Is Anger the Enemy?                                             
+|  219.00 |
+| Doc-U-Mat: Quality Laundry and Books | Emotional Security: A New 
+Algorithm                             |  199.75 |
+| Fricative Bookshop                   | Straight Talk About Computers                                   
+|  299.85 |
+| Bookbeat                             | The Gourmet Microwave                                           
+|   44.85 |
+| Bookbeat                             | Cooking with Computers: 
+Surreptitious Balance Sheets            |  298.75 |
++--------------------------------------+----------------------------------
+-------------------------------+---------+
